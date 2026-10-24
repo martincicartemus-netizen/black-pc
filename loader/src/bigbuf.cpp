@@ -4,11 +4,16 @@
 //   B = arena+0x2705000 (0x1F4C2C and 0x1F4C4A lea, size imm at 0x1F4C40)
 // Later regions sit at fixed arena offsets, so they cannot grow in place. Instead the four `lea` become
 // `mov ebp,imm32 ; nop` pointing at a separate contiguous block, and the two sizes are raised.
+// Off by default (the stock weapon files fit: the largest, bg1_bns.db, is 880,659 bytes): it is for modded weapon
+// files, and the block takes 2 x the size from the 64 MB the game has. PC SETTINGS > TWEAKS > WEAPON BUFFERS, from the
+// next start (the game sets the buffers up at boot); --buf-mb N for one run. Addresses are the NTSC-U build's, mapped
+// with xbe_va (the PAL build has the same code 0x30 further on; the lea operands are arena offsets, the same in both).
 #include "bigbuf.h"
 
 #include "common.h"
 #include "kernel/kexports.h"
 #include "kernel/xboxkrnl.h"
+#include "xbe.h"
 
 #include <cstring>
 
@@ -31,8 +36,11 @@ constexpr Lea kLeas[] = {
 };
 constexpr uint32_t kSizeAt[] = {0x001F4C04, 0x001F4C40};
 constexpr uint32_t kOldSize = 0x000E1800;
+uint32_t g_active_mb; // the size this run uses (0: the original)
 
 } // namespace
+
+uint32_t bigbuf_active_mb() { return g_active_mb; }
 
 bool install_bigbuf_patch()
 {
@@ -41,20 +49,20 @@ bool install_bigbuf_patch()
 
     // Check everything before changing anything.
     for (const Lea &l : kLeas) {
-        const uint8_t *c = (const uint8_t *)(uintptr_t)l.addr;
+        const uint8_t *c = (const uint8_t *)(uintptr_t)xbe_va(l.addr);
         uint32_t imm;
         memcpy(&imm, c + 2, 4);
         if (c[0] != 0x8D || c[1] != 0xA8 || imm != l.old_off) {
-            logf("bigbuf: lea at 0x%08x does not match this build; not patched", l.addr);
+            logf("bigbuf: lea at 0x%08x does not match this build; not patched", xbe_va(l.addr));
             return false;
         }
     }
     for (uint32_t at : kSizeAt) {
-        const uint8_t *c = (const uint8_t *)(uintptr_t)at;
+        const uint8_t *c = (const uint8_t *)(uintptr_t)xbe_va(at);
         uint32_t imm;
         memcpy(&imm, c, 4);
         if (c[-2] != 0x81 || c[-1] != 0xC5 || imm != kOldSize) {
-            logf("bigbuf: add at 0x%08x does not match this build; not patched", at);
+            logf("bigbuf: add at 0x%08x does not match this build; not patched", xbe_va(at));
             return false;
         }
     }
@@ -70,7 +78,7 @@ bool install_bigbuf_patch()
     const uint32_t base[2] = {(uint32_t)(uintptr_t)block, (uint32_t)(uintptr_t)block + buf};
 
     for (const Lea &l : kLeas) { // mov ebp, imm32 ; nop
-        uint8_t *c = (uint8_t *)(uintptr_t)l.addr;
+        uint8_t *c = (uint8_t *)(uintptr_t)xbe_va(l.addr);
         DWORD old;
         VirtualProtect(c, 6, PAGE_EXECUTE_READWRITE, &old);
         c[0] = 0xBD;
@@ -79,9 +87,10 @@ bool install_bigbuf_patch()
     }
     for (uint32_t at : kSizeAt) {
         DWORD old;
-        VirtualProtect((void *)(uintptr_t)at, 4, PAGE_EXECUTE_READWRITE, &old);
-        memcpy((void *)(uintptr_t)at, &buf, 4);
+        VirtualProtect((void *)(uintptr_t)xbe_va(at), 4, PAGE_EXECUTE_READWRITE, &old);
+        memcpy((void *)(uintptr_t)xbe_va(at), &buf, 4);
     }
+    g_active_mb = g_cfg.buf_mb;
     logf("bigbuf: weapon buffers A=0x%08x B=0x%08x, %u MB each (was 0x%x)", base[0], base[1], g_cfg.buf_mb, kOldSize);
     return true;
 }

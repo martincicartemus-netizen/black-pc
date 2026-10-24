@@ -164,7 +164,7 @@ The port's settings are in the game's menus: Options > PC SETTINGS on the main m
 |---|---|
 | VIDEO | render resolution, anti-aliasing, field of view, brightness, gamma, fullscreen |
 | DISPLAY | aspect ratio, frame rate (main menu only), filling geometry seams, effects at Xbox size |
-| TWEAKS | auto-aim, reload blur, lean angle, lean distance |
+| TWEAKS | auto-aim, reload blur, lean angle, lean distance, weapon buffers (bigger weapon files for mods; from the next start) |
 | AUDIO AND MOVIES | room reverb, skipping any movie, language (PAL disc; from the next start) |
 | CONTROLS | mouse sensitivity, mouse inversion, key bindings |
 
@@ -352,7 +352,7 @@ Os ajustes do port ficam dentro do menu do jogo: **Options > PC SETTINGS** e no 
 |---|---|
 | VIDEO | Resolução, Anti-aliasing, FOV, Brilho, Gama, Tela Cheia |
 | DISPLAY | Proporção de tela, Taxa de Quadros, Preenchimento de costuras, Efeitos no tamanho do Xbox |
-| TWEAKS | Mira Automática, Desfoque ao recarregar, Ângulo e distância da inclinação |
+| TWEAKS | Mira Automática, Desfoque ao recarregar, Ângulo e distância da inclinação, Buffers de armas (arquivos de armas maiores para mods; na próxima inicialização) |
 | AUDIO AND MOVIES | Reverberação de ambiente, Pular qualquer cutscene, Idioma (disco PAL; na próxima inicialização) |
 | CONTROLS | Sensibilidade do Mouse, Inversão do Mouse, Mapeamento de Teclas |
 

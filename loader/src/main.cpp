@@ -107,7 +107,7 @@ void usage()
            "  --perf-at S:D     record performance for D seconds from S seconds after the first frame (perf\\)\n"
            "  --timer-vblank    vblank from a 59.94 Hz timer instead of the display's refresh (default: follow a ~60 Hz display)\n"
            "  --force           run an XBE other than the known NTSC-U build\n"
-           "  --buf-mb N        size of the two weapon-data buffers in MB (default 4; 0 = original 0.88 MB)\n"
+           "  --buf-mb N        weapon-data buffers of N MB for modded weapon files (default 0 = the original 0.88 MB)\n"
            "  --verbose         print the whole log on the console too (default: startup, errors, exit; all in the log file)\n";
     if (g_console) fputs(kUsage, stdout);
     else if (!g_cfg.background) MessageBoxW(nullptr, widen(kUsage).c_str(), L"BLACK - command-line options", MB_OK);
@@ -294,6 +294,7 @@ bool parse_args()
         else if (a == L"--buf-mb") {
             std::wstring v;
             if (!next(v)) return false;
+            settings_mark_cli("weapon_buffers_mb");
             g_cfg.buf_mb = (uint32_t)_wtoi(v.c_str());
             if (g_cfg.buf_mb > 16) g_cfg.buf_mb = 16;
         }

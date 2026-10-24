@@ -363,3 +363,16 @@ User report: the game froze when the PC went to sleep. Three things broke, all f
   the current level number) is 0 and the language is not English (jne at PAL 0x1407F8). NOPping that jne plays
   the same English recording in German (dumped and compared: identical). A PS2 German video shows the same gap:
   the original has no German recording of those lines, so the port leaves it as it is.
+
+## Weapon buffers for mods (PR #16, 2026-10-24)
+
+- The game's init FUN_001F49F0 carves its main arena (MmAllocateContiguousMemoryEx(0x2A4D800)) into regions with
+  `lea ebp,[eax+OFFSET]` / `add ebp,SIZE`; two of them, 0xE1800 bytes each, hold the first-person weapon files
+  (levels\*\fpguns\*.db): A = arena+0x2623800 (lea at 0x1F4BF0 / 0x1F4C0E, size imm at 0x1F4C04), B = arena+0x2705000
+  (0x1F4C2C / 0x1F4C4A, size at 0x1F4C40). A bigger .db does not load ("disk error"). The largest stock file
+  (bg1_bns.db) is 880,659 bytes, so only mods need more (the PR's author: 1K textures, 34k-triangle models, ~2 MB).
+- `bigbuf.cpp` (the PR's code): the four lea become `mov ebp,imm32; nop` into a block taken at the top of the 64 MB, the
+  two sizes raised. Off by default (it takes 2 x the size from the game's memory): PC SETTINGS > TWEAKS > WEAPON
+  BUFFERS (ORIGINAL / 2 / 4 / 8 MB, from the next start; `weapon_buffers_mb` in black.ini), `--buf-mb N` (up to 16).
+  PAL: the same code 0x30 further on (xbe_va). Checked: 8 MB on NTSC-U and PAL, first mission loads and draws the
+  pistol from the moved buffer, no "out of contiguous memory". Later, bigger levels at 8 MB not checked.

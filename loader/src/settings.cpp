@@ -56,6 +56,7 @@ void settings_load()
         else if (k == "mouse_invert") g_cfg.mouse_invert = v != 0;
         else if (k == "autoaim") g_cfg.autoaim = v != 0;
         else if (k == "reloadblur") g_cfg.reload_blur = v != 0;
+        else if (k == "weapon_buffers_mb") g_cfg.buf_mb = (uint32_t)std::clamp((int)v, 0, 16);
         else if (k == "lean_angle") g_cfg.lean_angle = std::clamp(v, -45.0f, 45.0f);
         else if (k == "lean_offset") g_cfg.lean_offset = std::clamp(v, -2.0f, 2.0f);
         else if (k == "fov") g_cfg.fov = std::clamp(v, 50.0f, 120.0f);
@@ -88,6 +89,7 @@ void settings_save()
     fprintf(f, "reverb = %d\nreverb_gain = %.2f\n", g_cfg.reverb ? 1 : 0, g_cfg.reverb_gain);
     fprintf(f, "autoaim = %d\n", g_cfg.autoaim ? 1 : 0);
     fprintf(f, "reloadblur = %d\n", g_cfg.reload_blur ? 1 : 0);
+    fprintf(f, "weapon_buffers_mb = %u\n", g_cfg.buf_mb);
     fprintf(f, "lean_angle = %.1f\nlean_offset = %.3f\n", g_cfg.lean_angle, g_cfg.lean_offset);
     fprintf(f, "fov = %.1f\n", g_cfg.fov);
     fprintf(f, "skipanymovie = %d\n", g_cfg.skip_movies ? 1 : 0);

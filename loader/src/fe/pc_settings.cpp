@@ -12,6 +12,7 @@
 #include "fe/vars.h"
 #include "fov.h"
 #include "input/autoaim.h"
+#include "bigbuf.h"
 #include "language.h"
 #include "reload_blur.h"
 #include "settings.h"
@@ -176,10 +177,19 @@ const Row kRows[] = {
      [](int i) { return i ? number((float)i, L"%.0f") : std::wstring(L"0 (NO ROLL)"); }, true},
     {"LEAN DISTANCE", kSteps, [] { return step_of(g_cfg.lean_offset, 0, 0.025f); }, [](int i) { g_cfg.lean_offset = 0.025f * i; },
      [](int i) { return i ? number(0.025f * i, L"%.2f M") : std::wstring(L"0 (NO SHIFT)"); }, true},
+    // weapon-data buffers for modded weapon files (bigbuf.cpp), from the next start
+    {"WEAPON BUFFERS", 4, [] { return g_cfg.buf_mb >= 8 ? 3 : g_cfg.buf_mb >= 4 ? 2 : g_cfg.buf_mb >= 2 ? 1 : 0; },
+     [](int i) { g_cfg.buf_mb = i ? 1u << i : 0; },
+     [](int i) {
+         uint32_t mb = i ? 1u << i : 0;
+         std::wstring s = mb ? number((float)mb, L"%.0f MB") : std::wstring(L"ORIGINAL");
+         return mb != bigbuf_active_mb() ? s + L" (RESTART)" : s;
+     }},
 };
 constexpr int kRowN = sizeof kRows / sizeof kRows[0];
 constexpr int kKeyBindings = 15;
 constexpr int kLanguage = 16;
+constexpr int kWeaponBuffers = 20;
 
 } // namespace
 
@@ -188,7 +198,7 @@ const std::vector<Group> &groups()
     static const std::vector<Group> g = {
         {"PCVideo", "VIDEO", {0, 1, 2, 3, 4, 5}},
         {"PCDisplay", "DISPLAY", {6, 7, 8, 9}},
-        {"PCTweaks", "TWEAKS", {11, 17, 18, 19}},
+        {"PCTweaks", "TWEAKS", {11, 17, 18, 19, kWeaponBuffers}},
         {"PCAudio", "AUDIO AND MOVIES", {10, 12, kLanguage}},
         {"PCControls", "CONTROLS", {13, 14, kKeyBindings}},
     };
@@ -221,7 +231,7 @@ void step(int n, int dir)
 
 bool is_slider(int n) { return n >= 0 && n < kRowN && kRows[n].slider; }
 
-bool restart_only(int n) { return n == 6 || n == 7 || n == kLanguage; } // read by the game at boot
+bool restart_only(int n) { return n == 6 || n == 7 || n == kLanguage || n == kWeaponBuffers; } // read by the game at boot
 
 const char *link(int n) { return n == kKeyBindings ? "PCBindings" : nullptr; }
 
