@@ -26,6 +26,7 @@ add_library(blackrt SHARED
   src/timing.cpp
   src/fov.cpp
   src/reload_blur.cpp
+  src/bigbuf.cpp
   src/fe/calls.cpp
   src/fe/vars.cpp
   src/fe/pc_settings.cpp
